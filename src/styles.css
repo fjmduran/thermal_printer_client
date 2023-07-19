@@ -2,3 +2,43 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+button{
+    padding: 1rem !important;
+    height:auto !important;
+    min-height: 56px;
+}
+
+mat-form-field{
+    padding-top: 1rem;
+}
+
+.info{
+    border-radius: 4px;
+    padding: 8px;
+    text-align: center;
+}
+
+.info_success {
+    color: #155724;
+    background-color: #d4edda;
+    border: solid 2px #1c7731;
+  }
+  
+  .info_warning {
+    color: #856404;
+    background-color: #fff3cd;
+    border: solid 2px #f3be1f;
+  }
+  
+  .info_danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: solid 2px #992732;
+  }
+  
+  .info_info {
+    color: #005ec2;
+    background-color: #cce5ff;
+    border: solid 2px #037dff;
+  }

@@ -4,6 +4,7 @@ export interface MessageThermalPrinterModel{
     heightFont?:HeightFont
     widthFont?:WidthFont
     isQR?:Boolean
+    printerName?:string
 }
 
 enum AlignFont

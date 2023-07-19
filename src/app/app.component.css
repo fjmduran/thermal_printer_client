@@ -1,0 +1,14 @@
+.wrapper{
+    padding: 1rem;
+}
+
+h1{
+    text-align: center;
+}
+
+.printerWrapper{
+    max-width: 400px;
+
+    display: flex;
+    flex-direction: column;
+}
