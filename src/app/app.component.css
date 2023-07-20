@@ -7,14 +7,14 @@ h1{
 }
 
 .printerWrapper{
-    max-width: 400px;
+    max-width: 450px;
 
     display: flex;
     flex-direction: column;
 }
 
 .toPrintWrapper{
-    max-width: 400px;
+    max-width: 450px;
 
     display: flex;
     flex-direction: column;
@@ -23,4 +23,13 @@ h1{
 .itemTicket{
     display: flex;
     justify-content: space-between;
+    align-items: center;    
+}
+
+button{
+    margin-bottom: 1rem;
+}
+
+mat-form-field{
+    padding-top: 0;
 }

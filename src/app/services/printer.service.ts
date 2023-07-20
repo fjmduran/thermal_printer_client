@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { MessageThermalPrinterInterface } from '../models/MessageThermalPrinter.interface';
+import { MessageThermalPrinterInterface, TicketInterface, TicketItemInterface } from '../models/MessageThermalPrinter.interface';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { ThermalPrinter } from '../models/ThermalPrinter';
@@ -17,11 +17,15 @@ export class PrinterService {
     return await printer.PrintTestPage();
   }
 
-  async ToPrint(message:MessageThermalPrinterInterface) {
+  async ToPrintText(message:MessageThermalPrinterInterface) {
     const printer=new ThermalPrinter();
     printer.AddMessage(message);
-    return await printer.ToPrint();
+    return await printer.ToPrintText();
+  }
 
+  async ToPrintTicket(ticketItems:TicketItemInterface[]) {    
+    const printer=new ThermalPrinter();
+    return await printer.ToPrintTicket(ticketItems);
   }
 
   GetPrinters(): Observable<string[]> {

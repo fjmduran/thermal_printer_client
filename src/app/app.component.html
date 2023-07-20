@@ -2,7 +2,6 @@
   <h1>
     Trabajando con una impresora térmica <mat-icon>receipt_long</mat-icon>
   </h1>
-
   <div class="printerWrapper">
     <button
       mat-flat-button
@@ -55,13 +54,13 @@
   <div class="toPrintWrapper">
     <mat-form-field appearance="outline">
       <textarea
-        [ngModel]="textArea"
+        [(ngModel)]="textArea"
         matInput
         rows="5"
         placeholder="Escribe aquí el texto a imprimir"
       ></textarea>
     </mat-form-field>
-    <button mat-flat-button type="button" color="primary" (click)="ToPrint()">
+    <button mat-flat-button type="button" color="primary" (click)="ToPrintText()">
       <mat-icon>print</mat-icon>Imprimir texto
     </button>
   </div>
@@ -84,6 +83,7 @@
               matInput
               type="text"
               formControlName="description"
+              maxlength="21"
               required
             />
           </mat-form-field>
@@ -91,14 +91,26 @@
             <mat-label>€/ud</mat-label>
             <input matInput type="number" formControlName="eur_ud" required />
           </mat-form-field>
+          <button mat-icon-button color="warn" (click)="deleteTicketItem(i)">
+            <mat-icon>clear</mat-icon>
+          </button>
         </div>
       </div>
     </form>
+    <button
+      mat-stroked-button
+      type="button"
+      color="primary"
+      (click)="addTicketItem()"
+    >
+      <mat-icon>add</mat-icon>Añadir línea al ticket
+    </button>
     <button
       mat-flat-button
       type="submit"
       color="primary"
       (click)="ToPrintTicket()"
+      [disabled]="ticketForm.invalid"
     >
       <mat-icon>receipt_long</mat-icon>Imprimir ticket
     </button>

@@ -1,13 +1,15 @@
 export interface MessageThermalPrinterInterface{
     message:string
-    justification?:Justification
-    heightFont?:HeightFont
-    widthFont?:WidthFont
+    justification?:JustificationEnum
+    heightFont?:HeightFontEnum
+    widthFont?:WidthFontEnum
     isQR?:Boolean
     printerName?:string
 }
 
 export interface TicketInterface{
+    date:string
+    time:string
     items:TicketItemInterface[]
     total:number
     base:number
@@ -20,18 +22,18 @@ export interface TicketItemInterface{
     eur_ud:number
 }
 
-enum Justification
+export enum JustificationEnum
 {
     Left=0,
     Center=1
 }
 
-enum HeightFont
+export enum HeightFontEnum
 {
     Normal = 0,
 }
 
-enum WidthFont
+export enum WidthFontEnum
 {
     Normal = 0,
 }

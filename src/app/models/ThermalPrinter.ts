@@ -1,4 +1,9 @@
-import { MessageThermalPrinterInterface } from './MessageThermalPrinter.interface';
+import {
+  JustificationEnum,
+  MessageThermalPrinterInterface,
+  TicketInterface,
+  TicketItemInterface,
+} from './MessageThermalPrinter.interface';
 import { Injectable } from '@angular/core';
 
 @Injectable({
@@ -7,13 +12,13 @@ import { Injectable } from '@angular/core';
 export class ThermalPrinter {
   private readonly MAX_CHARACTERS_BY_LINE = 32;
   private readonly DEFAULT_PRINTER_NAME = 'POS-58-Series';
-  private readonly URL_PLUGIN="http://localhost:8080";
+  private readonly URL_PLUGIN = 'http://localhost:8080';
 
   private messages: MessageThermalPrinterInterface[] = [];
 
   public AddMessage(message: MessageThermalPrinterInterface) {
     const printerName = this.PrinterName;
-    message.message=this.WordWrap(message.message);
+    message.message = this.WordWrap(message.message);
     message.printerName = printerName;
     this.messages.push(message);
   }
@@ -39,12 +44,61 @@ export class ThermalPrinter {
     });
     const currentTime = new Date();
     this.AddMessage({ message: `${currentTime.toLocaleString()}` });
-    return await this.ToPrint();
+    return await this.ToPrintText();
   }
 
-  public async ToPrint(): Promise<boolean> {    
-    const data = this.messages;
+  public async ToPrintText(): Promise<boolean> {
+    return await this.RequestToPrinter();
+  }
 
+  public async ToPrintTicket(ticketItems: TicketItemInterface[]) {
+    const ticket = this.ToCreateTicket(ticketItems);
+
+    this.AddMessage({ message: 'NOMBRE RESTAURANTE' });
+    this.AddBlankLine();
+    this.AddMessage({ message: `FECHA: ${ticket.date}` });
+    this.AddMessage({ message: `HORA: ${ticket.time}` });
+    this.AddBlankLine();
+
+    this.AddMessage({ message: `UDS CONCEPTO              EU/UD` });
+    ticketItems.forEach((item) => {
+      this.AddMessage(this.GetItemTickeForPrinter(item));
+    });
+
+    this.AddBlankLine();
+    this.AddMessage({ message: `TOTAL: ${ticket.total}` });
+    this.AddMessage({ message: `BASE: ${ticket.base}` });
+    this.AddMessage({ message: `IVA: ${ticket.iva}` });
+    this.AddBlankLine();
+    this.AddMessage({ message: `GRACIAS POR SU VISITA`,justification: JustificationEnum.Center});
+    return await this.RequestToPrinter();
+  }
+
+  private GetItemTickeForPrinter(
+    item: TicketItemInterface
+  ): MessageThermalPrinterInterface {
+    const udsWithDesiredLength = this.addSpaces(item.uds.toString(),3);
+    const descriptionWithDesiredLength = this.addSpaces(item.description.toString(),21,false);
+    const eur_udWithDesiredLenght = this.addSpaces(item.eur_ud.toString(),5);
+
+    return {message:`${udsWithDesiredLength} ${descriptionWithDesiredLength} ${eur_udWithDesiredLenght}`}
+  }
+
+  private addSpaces(input: string, desiredLength: number, spacesToStart=true): string {
+    //la siguiente función devolverá un string con longitud deseada
+    //si el string fuera más pequeño, añadirá espacios al inicio o al final según el parámetro spacesToStart
+    if (input.length >= desiredLength) {
+      return input.substring(0,desiredLength); 
+    }
+  
+    const spacesToAdd = desiredLength - input.length;
+    const spaces = ' '.repeat(spacesToAdd);
+    if(spacesToStart) return spaces + input;
+    return input + spaces;
+  }
+
+  private async RequestToPrinter() {
+    const data = this.messages;
     try {
       const response = await fetch(this.URL_PLUGIN, {
         method: 'POST',
@@ -65,6 +119,26 @@ export class ThermalPrinter {
       console.error('Error:', error.message);
       return false;
     }
+  }
+
+  private ToCreateTicket(ticketItems: TicketItemInterface[]): TicketInterface {
+    const currentDate = new Date();
+    let total = 0;
+    ticketItems.forEach((item) => {
+      total += item.uds * item.eur_ud;
+      total = Number(total.toFixed(2));
+    });
+    let base = total * 0.79;
+    base = Number(base.toFixed(2));
+    const iva = Number(Number(total - base).toFixed(2));
+    return {
+      date: currentDate.toLocaleDateString(),
+      time: currentDate.toLocaleTimeString(),
+      items: ticketItems,
+      total: Number(total.toFixed(2)),
+      base: Number(base.toFixed(2)),
+      iva,
+    };
   }
 
   private WordWrap(message: string): string {
