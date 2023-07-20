@@ -1,35 +1,40 @@
-.wrapper{
+.wrapper {
+    margin: 0 auto;
     padding: 1rem;
+    max-width: 600px;
 }
 
-h1{
+h1 {
     text-align: center;
 }
 
-.printerWrapper{
+.example-headers-align .mat-expansion-panel-header-description {
+    justify-content: space-between;
+    align-items: center;
+}
+
+.example-headers-align .mat-mdc-form-field+.mat-mdc-form-field {
+    margin-left: 8px;
+}
+
+.toPrintWrapper {
+    margin: 0 auto;
     max-width: 450px;
 
     display: flex;
     flex-direction: column;
 }
 
-.toPrintWrapper{
-    max-width: 450px;
-
-    display: flex;
-    flex-direction: column;
-}
-
-.itemTicket{
+.itemTicket {
     display: flex;
     justify-content: space-between;
-    align-items: center;    
+    align-items: center;
 }
 
-button{
+button {
     margin-bottom: 1rem;
 }
 
-mat-form-field{
+mat-form-field {
     padding-top: 0;
 }

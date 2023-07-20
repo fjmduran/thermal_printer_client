@@ -22,7 +22,7 @@ export class AppComponent implements OnInit {
   public requestPrintStatusEnum = RequestPrintStatus;
 
   public textArea =
-    'Esto es una línea larga para probar cómo la impresora no corta palabras y suprimir los acentos';
+    'Esto es una línea larga para probar cómo la impresora no corta palabras';
 
   public ticketForm: FormGroup = new FormGroup({
     ticketItems: new FormArray([]),

@@ -10,7 +10,7 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class ThermalPrinter {
-  private readonly MAX_CHARACTERS_BY_LINE = 32;
+  private readonly MAX_CHARACTERS_BY_LINE = 30;
   private readonly DEFAULT_PRINTER_NAME = 'POS-58-Series';
   private readonly URL_PLUGIN = 'http://localhost:8080';
 
@@ -60,40 +60,53 @@ export class ThermalPrinter {
     this.AddMessage({ message: `HORA: ${ticket.time}` });
     this.AddBlankLine();
 
-    this.AddMessage({ message: `UDS CONCEPTO              EU/UD` });
+    this.AddMessage({ message: `UDS CONCEPTO            EU/UD` });
     ticketItems.forEach((item) => {
       this.AddMessage(this.GetItemTickeForPrinter(item));
     });
 
     this.AddBlankLine();
-    this.AddMessage({ message: `TOTAL: ${ticket.total}` });
-    this.AddMessage({ message: `BASE: ${ticket.base}` });
-    this.AddMessage({ message: `IVA: ${ticket.iva}` });
+    this.AddMessage({ message: `TOTAL A PAGAR: ${ticket.total.toFixed(2)}` });
+    this.AddMessage({ message: `BASE: ${ticket.base.toFixed(2)}` });
+    this.AddMessage({ message: `IVA: ${ticket.iva.toFixed(2)}` });
     this.AddBlankLine();
-    this.AddMessage({ message: `GRACIAS POR SU VISITA`,justification: JustificationEnum.Center});
+    this.AddMessage({
+      message: `GRACIAS POR SU VISITA`,
+      justification: JustificationEnum.Center,
+    });
     return await this.RequestToPrinter();
   }
 
   private GetItemTickeForPrinter(
     item: TicketItemInterface
   ): MessageThermalPrinterInterface {
-    const udsWithDesiredLength = this.addSpaces(item.uds.toString(),3);
-    const descriptionWithDesiredLength = this.addSpaces(item.description.toString(),21,false);
-    const eur_udWithDesiredLenght = this.addSpaces(item.eur_ud.toString(),5);
+    const udsWithDesiredLength = this.addSpaces(item.uds.toString(), 3);
+    const descriptionWithDesiredLength = this.addSpaces(
+      item.description.toString(),
+      19,
+      false
+    );
+    const eur_udWithDesiredLenght = this.addSpaces(item.eur_ud.toFixed(2), 5);
 
-    return {message:`${udsWithDesiredLength} ${descriptionWithDesiredLength} ${eur_udWithDesiredLenght}`}
+    return {
+      message: `${udsWithDesiredLength} ${descriptionWithDesiredLength} ${eur_udWithDesiredLenght}`,
+    };
   }
 
-  private addSpaces(input: string, desiredLength: number, spacesToStart=true): string {
+  private addSpaces(
+    input: string,
+    desiredLength: number,
+    spacesToStart = true
+  ): string {
     //la siguiente función devolverá un string con longitud deseada
     //si el string fuera más pequeño, añadirá espacios al inicio o al final según el parámetro spacesToStart
     if (input.length >= desiredLength) {
-      return input.substring(0,desiredLength); 
+      return input.substring(0, desiredLength);
     }
-  
+
     const spacesToAdd = desiredLength - input.length;
     const spaces = ' '.repeat(spacesToAdd);
-    if(spacesToStart) return spaces + input;
+    if (spacesToStart) return spaces + input;
     return input + spaces;
   }
 
