@@ -1,28 +1,27 @@
-import { HttpClient } from '@angular/common/http';
-import { MessageThermalPrinterModel } from './MessageThermalPrinter.interface';
-import { Injectable, Injector, inject } from '@angular/core';
+import { MessageThermalPrinterInterface } from './MessageThermalPrinter.interface';
+import { Injectable } from '@angular/core';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ThermalPrinter {
   private readonly MAX_CHARACTERS_BY_LINE = 32;
-  private readonly DEFAULT_PRINTER_NAME="POS-58-Series"
+  private readonly DEFAULT_PRINTER_NAME = 'POS-58-Series';
+  private readonly URL_PLUGIN="http://localhost:8080";
 
-  constructor() {}
+  private messages: MessageThermalPrinterInterface[] = [];
 
-  private messages: MessageThermalPrinterModel[] = [];
-
-  public AddMessage(message: MessageThermalPrinterModel) {
-    const printerName=this.PrinterName;    
-    message.printerName=printerName;
+  public AddMessage(message: MessageThermalPrinterInterface) {
+    const printerName = this.PrinterName;
+    message.message=this.WordWrap(message.message);
+    message.printerName = printerName;
     this.messages.push(message);
   }
 
-  private get PrinterName():string{
-    const printerName=localStorage.getItem("printerName");
-    if(printerName) return printerName;
-    console.error("No se encuentra la impresora, se asigna una por defecto");    
+  private get PrinterName(): string {
+    const printerName = localStorage.getItem('printerName');
+    if (printerName) return printerName;
+    console.error('No se encuentra la impresora, se asigna una por defecto');
     return this.DEFAULT_PRINTER_NAME;
   }
 
@@ -32,23 +31,22 @@ export class ThermalPrinter {
     });
   }
 
-  public async PrintTestPage():Promise<boolean> {
-    this.AddMessage({message:'Página de prueba'})
-    this.AddMessage({message:'Si ve esta impresión es que su impresora funciona correctamente.'})
-   const currentTime=new Date();
-    this.AddMessage({message:`${currentTime.toLocaleString()}`})
-    this.AddBlankLine();
-    this.AddMessage({message:'@fjmduran'});
-    this.AddMessage({message:'Para más información contacte en info@fjmduran.com'});   
-    return await this.ToPrint();    
+  public async PrintTestPage(): Promise<boolean> {
+    this.AddMessage({ message: 'Página de prueba' });
+    this.AddMessage({
+      message:
+        'Si ve esta impresión es que su impresora funciona correctamente.',
+    });
+    const currentTime = new Date();
+    this.AddMessage({ message: `${currentTime.toLocaleString()}` });
+    return await this.ToPrint();
   }
 
-  private async ToPrint(): Promise<boolean> {
-    const url = 'http://localhost:8080';
+  public async ToPrint(): Promise<boolean> {    
     const data = this.messages;
 
     try {
-      const response = await fetch(url, {
+      const response = await fetch(this.URL_PLUGIN, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,5 +65,24 @@ export class ThermalPrinter {
       console.error('Error:', error.message);
       return false;
     }
+  }
+
+  private WordWrap(message: string): string {
+    // Función para dividir el texto en líneas que no corten palabras
+
+    const words = message.split(' ');
+    let currentLine = '';
+    let lines = '';
+
+    words.forEach((word) => {
+      if (currentLine.length + word.length + 1 > this.MAX_CHARACTERS_BY_LINE) {
+        lines += `${currentLine}\n`;
+        currentLine = word + ' ';
+      } else {
+        currentLine += word + ' ';
+      }
+    });
+    lines += `${currentLine}\n`;
+    return lines;
   }
 }

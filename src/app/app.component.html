@@ -10,7 +10,7 @@
       (click)="loadPrinters()"
       color="primary"
     >
-      <mat-icon>print</mat-icon>Cargar impresoras
+      <mat-icon>list</mat-icon>Cargar impresoras
     </button>
     <ng-container *ngIf="printers$ | async as printers">
       <mat-form-field appearance="outline">
@@ -23,6 +23,7 @@
       </mat-form-field>
       <button
         *ngIf="selectedPrinter !== ''"
+        [disabled]="testPageStatus === requestPrintStatusEnum.Requested"
         mat-stroked-button
         type="button"
         (click)="PrintTestMessage()"
@@ -32,10 +33,74 @@
       </button>
 
       <container-element [ngSwitch]="testPageStatus">
-        <p class="info info_info" *ngSwitchCase="1">Esperando respuesta</p>
-        <p class="info info_success" *ngSwitchCase="2">Prueba correcta</p>
-        <p class="info info_danger" *ngSwitchCase="3">Prueba fallida</p>        
-     </container-element>
+        <p
+          class="info info_info"
+          *ngSwitchCase="requestPrintStatusEnum.Requested"
+        >
+          Esperando respuesta
+        </p>
+        <p
+          class="info info_success"
+          *ngSwitchCase="requestPrintStatusEnum.Successful"
+        >
+          Prueba correcta
+        </p>
+        <p class="info info_danger" *ngSwitchCase="requestPrintStatusEnum.Fail">
+          Prueba fallida
+        </p>
+      </container-element>
     </ng-container>
+  </div>
+
+  <div class="toPrintWrapper">
+    <mat-form-field appearance="outline">
+      <textarea
+        [ngModel]="textArea"
+        matInput
+        rows="5"
+        placeholder="Escribe aquí el texto a imprimir"
+      ></textarea>
+    </mat-form-field>
+    <button mat-flat-button type="button" color="primary" (click)="ToPrint()">
+      <mat-icon>print</mat-icon>Imprimir texto
+    </button>
+  </div>
+
+  <div class="toPrintWrapper">
+    <form [formGroup]="ticketForm">
+      <div formArrayName="ticketItems">
+        <div
+          class="itemTicket"
+          *ngFor="let item of itemsFormTicket.controls; let i = index"
+          [formGroupName]="i"
+        >
+          <mat-form-field appearance="outline" style="width: 64px">
+            <mat-label>Uds</mat-label>
+            <input matInput type="number" formControlName="uds" required />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Descripción</mat-label>
+            <input
+              matInput
+              type="text"
+              formControlName="description"
+              required
+            />
+          </mat-form-field>
+          <mat-form-field appearance="outline" style="width: 96px">
+            <mat-label>€/ud</mat-label>
+            <input matInput type="number" formControlName="eur_ud" required />
+          </mat-form-field>
+        </div>
+      </div>
+    </form>
+    <button
+      mat-flat-button
+      type="submit"
+      color="primary"
+      (click)="ToPrintTicket()"
+    >
+      <mat-icon>receipt_long</mat-icon>Imprimir ticket
+    </button>
   </div>
 </div>
