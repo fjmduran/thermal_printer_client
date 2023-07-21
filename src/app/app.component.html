@@ -21,7 +21,7 @@
         >
           <mat-icon>list</mat-icon>Cargar impresoras
         </button>
-        <ng-container *ngIf="printers$ | async as printers">
+        <ng-container *ngIf="printers.length>0">
           <mat-form-field appearance="outline">
             <mat-label>Elige una impresora</mat-label>
             <mat-select [(ngModel)]="selectedPrinter" required>

@@ -172,4 +172,29 @@ export class ThermalPrinter {
     lines += `${currentLine}\n`;
     return lines;
   }
+
+  public PrinterToLocalStorage(printerName:string){
+    localStorage.setItem('printerName',printerName);
+  }
+
+  public async GetPrinters(): Promise<string[]> {    
+    try {
+      const response = await fetch(this.URL_PLUGIN, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }        
+      });
+
+      if (!response.ok) {
+        throw new Error('Error en la solicitud');
+      }
+
+      const result:string[] = await response.json();      
+      return result;
+    } catch (error: any) {
+      console.error('Error:', error.message);
+      return [];
+    }
+  }
 }

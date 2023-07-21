@@ -1,9 +1,12 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { MessageThermalPrinterInterface, TicketItemInterface } from './models/MessageThermalPrinter.interface';
+import {
+  MessageThermalPrinterInterface,
+  TicketItemInterface,
+} from './models/MessageThermalPrinter.interface';
 import { HttpClient } from '@angular/common/http';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
-import { PrinterService } from './services/printer.service';
 import { Observable } from 'rxjs';
+import { ThermalPrinter } from './models/ThermalPrinter';
 
 @Component({
   selector: 'app-root',
@@ -11,11 +14,9 @@ import { Observable } from 'rxjs';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
-  private printerService = inject(PrinterService);
-
   public selectedPrinter = '';
 
-  public printers$!: Observable<string[]>;
+  public printers: string[] = [];
 
   public testPageStatus = RequestPrintStatus.Initial;
   public requestPrintStatus = RequestPrintStatus.Initial;
@@ -53,15 +54,17 @@ export class AppComponent implements OnInit {
     this.itemsFormTicket.removeAt(index);
   }
 
-  loadPrinters() {
-    this.printers$ = this.printerService.GetPrinters();
+  async loadPrinters() {
+    const printer = new ThermalPrinter();
+    this.printers = await printer.GetPrinters();
   }
 
   async PrintTestMessage() {
-    this.printerService.SavePrinter(this.selectedPrinter);
+    const printer = new ThermalPrinter();
     this.testPageStatus = RequestPrintStatus.Requested;
-    const testStatus = await this.printerService.ToPrintTest();
+    const testStatus = await printer.PrintTestPage();
     if (testStatus) {
+      printer.PrinterToLocalStorage(this.selectedPrinter);
       this.testPageStatus = RequestPrintStatus.Successful;
     } else {
       this.testPageStatus = RequestPrintStatus.Fail;
@@ -69,10 +72,12 @@ export class AppComponent implements OnInit {
   }
 
   async ToPrintText() {
-    const printStatus = await this.printerService.ToPrintText({
+    const printer = new ThermalPrinter();
+    printer.AddMessage({
       message: this.textArea,
-    });    
-    
+    });
+    const printStatus = await printer.ToPrintText();
+
     if (printStatus) {
       console.log('OK');
       //this.testPageStatus = RequestPrintStatus.Successful;
@@ -83,11 +88,12 @@ export class AppComponent implements OnInit {
   }
 
   async ToPrintTicket() {
-    const items:TicketItemInterface[] = [];
-    this.itemsFormTicket.controls.forEach((item)=>{
-      items.push(item.value as TicketItemInterface)
-    });       
-     const printStatus = await this.printerService.ToPrintTicket(items);
+    const items: TicketItemInterface[] = [];
+    this.itemsFormTicket.controls.forEach((item) => {
+      items.push(item.value as TicketItemInterface);
+    });
+    const printer = new ThermalPrinter();
+    const printStatus = await printer.ToPrintTicket(items);
     if (printStatus) {
       console.log('OK');
       //this.testPageStatus = RequestPrintStatus.Successful;
