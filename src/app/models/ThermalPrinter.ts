@@ -1,8 +1,9 @@
 import {
+  BusinessDataForThermalTicket,
   JustificationEnum,
   MessageThermalPrinterInterface,
-  TicketInterface,
-  TicketItemInterface,
+  ThermalTicketInterface,
+  ThermalTicketItemInterface,
 } from './MessageThermalPrinter.interface';
 import { Injectable } from '@angular/core';
 
@@ -51,10 +52,10 @@ export class ThermalPrinter {
     return await this.RequestToPrinter();
   }
 
-  public async ToPrintTicket(ticketItems: TicketItemInterface[]) {
+  public async ToPrintTicket(ticketItems: ThermalTicketItemInterface[], business:BusinessDataForThermalTicket) {
     const ticket = this.ToCreateTicket(ticketItems);
 
-    this.AddMessage({ message: 'NOMBRE RESTAURANTE' });
+    this.AddMessage({ message: `${business.name}` });
     this.AddBlankLine();
     this.AddMessage({ message: `FECHA: ${ticket.date}` });
     this.AddMessage({ message: `HORA: ${ticket.time}` });
@@ -78,7 +79,7 @@ export class ThermalPrinter {
   }
 
   private GetItemTickeForPrinter(
-    item: TicketItemInterface
+    item: ThermalTicketItemInterface
   ): MessageThermalPrinterInterface {
     const udsWithDesiredLength = this.addSpaces(item.uds.toString(), 3);
     const descriptionWithDesiredLength = this.addSpaces(
@@ -134,7 +135,7 @@ export class ThermalPrinter {
     }
   }
 
-  private ToCreateTicket(ticketItems: TicketItemInterface[]): TicketInterface {
+  private ToCreateTicket(ticketItems: ThermalTicketItemInterface[]): ThermalTicketInterface {
     const currentDate = new Date();
     let total = 0;
     ticketItems.forEach((item) => {

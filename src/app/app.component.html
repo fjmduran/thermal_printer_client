@@ -1,6 +1,7 @@
 <div class="wrapper">
   <h1>
-    Trabajando con una impresora térmica <mat-icon>receipt_long</mat-icon>
+    Configurando y trabajando con una impresora térmica
+    <mat-icon>receipt_long</mat-icon>
   </h1>
 
   <mat-accordion class="example-headers-align" multi>
@@ -21,7 +22,7 @@
         >
           <mat-icon>list</mat-icon>Cargar impresoras
         </button>
-        <ng-container *ngIf="printers.length>0">
+        <ng-container *ngIf="printers.length > 0">
           <mat-form-field appearance="outline">
             <mat-label>Elige una impresora</mat-label>
             <mat-select [(ngModel)]="selectedPrinter" required>
@@ -103,6 +104,17 @@
       </mat-expansion-panel-header>
       <div class="toPrintWrapper">
         <form [formGroup]="ticketForm">
+          <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Nombre de tu negocio</mat-label>
+            <input
+              matInput
+              type="text"
+              formControlName="businessName"
+              maxlength="21"
+              required
+            />
+            <mat-icon matSuffix>storefront</mat-icon>
+          </mat-form-field>
           <div formArrayName="ticketItems">
             <div
               class="itemTicket"

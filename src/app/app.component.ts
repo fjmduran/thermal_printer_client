@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import {
   MessageThermalPrinterInterface,
-  TicketItemInterface,
+  ThermalTicketItemInterface,
 } from './models/MessageThermalPrinter.interface';
 import { HttpClient } from '@angular/common/http';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
@@ -26,6 +26,10 @@ export class AppComponent implements OnInit {
     'Esto es una línea larga para probar cómo la impresora no corta palabras';
 
   public ticketForm: FormGroup = new FormGroup({
+    businessName: new FormControl(null, [
+      Validators.required,
+      Validators.maxLength(21),
+    ]),
     ticketItems: new FormArray([]),
   });
 
@@ -88,12 +92,15 @@ export class AppComponent implements OnInit {
   }
 
   async ToPrintTicket() {
-    const items: TicketItemInterface[] = [];
+    const items: ThermalTicketItemInterface[] = [];
     this.itemsFormTicket.controls.forEach((item) => {
-      items.push(item.value as TicketItemInterface);
+      items.push(item.value as ThermalTicketItemInterface);
     });
+    const businessName=this.ticketForm.get('businessName')?.value;
+    console.log(businessName);
+    
     const printer = new ThermalPrinter();
-    const printStatus = await printer.ToPrintTicket(items);
+    const printStatus = await printer.ToPrintTicket(items,{name:businessName});
     if (printStatus) {
       console.log('OK');
       //this.testPageStatus = RequestPrintStatus.Successful;

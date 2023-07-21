@@ -7,19 +7,23 @@ export interface MessageThermalPrinterInterface{
     printerName?:string
 }
 
-export interface TicketInterface{
+export interface ThermalTicketInterface{
     date:string
     time:string
-    items:TicketItemInterface[]
+    items:ThermalTicketItemInterface[]
     total:number
     base:number
     iva:number
 }
 
-export interface TicketItemInterface{
+export interface ThermalTicketItemInterface{
     uds:number
     description:string
     eur_ud:number
+}
+
+export interface BusinessDataForThermalTicket{
+    name:string
 }
 
 export enum JustificationEnum
