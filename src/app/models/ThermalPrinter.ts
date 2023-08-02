@@ -13,7 +13,7 @@ import { Injectable } from '@angular/core';
 export class ThermalPrinter {
   private readonly MAX_CHARACTERS_BY_LINE = 30;
   private readonly DEFAULT_PRINTER_NAME = 'POS-58-Series';
-  private readonly URL_PLUGIN = 'http://localhost:8080';
+  private readonly URL_PLUGIN = 'http://localhost:7878';
 
   private messages: MessageThermalPrinterInterface[] = [];
 
@@ -88,7 +88,6 @@ export class ThermalPrinter {
       false
     );
     const eur_udWithDesiredLenght = this.addSpaces(item.eur_ud.toFixed(2), 5);
-
     return {
       message: `${udsWithDesiredLength} ${descriptionWithDesiredLength} ${eur_udWithDesiredLenght}`,
     };
@@ -142,7 +141,7 @@ export class ThermalPrinter {
       total += item.uds * item.eur_ud;
       total = Number(total.toFixed(2));
     });
-    let base = total * 0.79;
+    let base = total / 1.1;
     base = Number(base.toFixed(2));
     const iva = Number(Number(total - base).toFixed(2));
     return {

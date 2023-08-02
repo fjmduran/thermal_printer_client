@@ -4,16 +4,15 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MaterialModule } from './modules/material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ThermalPrinterComponent } from './thermal-printer/thermal-printer.component';
 
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [AppComponent, ThermalPrinterComponent],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
-    HttpClientModule,
-    MaterialModule,
+    HttpClientModule,    
     FormsModule, ReactiveFormsModule
   ],
   providers: [],

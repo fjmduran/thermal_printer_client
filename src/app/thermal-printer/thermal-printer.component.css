@@ -1,0 +1,42 @@
+.wrapper {    
+    margin: 0 auto;
+    padding: 1rem;
+    max-width: 600px;
+}
+
+h1 {
+    text-align: center;
+}
+
+input{
+    font-size: 0.8rem !important; 
+    height: 2.5rem;
+    padding: 10px;
+}
+
+.toPrintWrapper {
+    margin: 0 auto;       
+
+    display: flex;
+    flex-direction: column;
+}
+
+.toPrintWrapper .material-icons{
+    margin-right: 0.8rem;
+}
+
+.itemTicket{
+    display:flex;
+}
+
+.itemTicketDelete{
+    width: 2.5rem;   
+    height: 2.5rem;
+    
+    background-color: lightcoral;
+    border-color: lightcoral;    
+}
+
+.itemTicketDelete .material-icons{
+    margin: 0;
+}

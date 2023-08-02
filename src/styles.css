@@ -1,16 +1,12 @@
 /* You can add global styles to this file, and also import other style files */
 
-html, body { height: 100%; background-color: lightgray;}
+html, body { height: 100%;}
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 button{
-    padding: 1rem !important;
-    height:auto !important;
-    min-height: 56px;
-}
-
-mat-form-field{
-    padding-top: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .info{

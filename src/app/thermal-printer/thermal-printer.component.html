@@ -1,0 +1,140 @@
+<div class="wrapper">
+  <h1>Configurando y trabajando con una impresora térmica</h1>
+
+  <details>
+    <summary>Configurar impresora</summary>
+    <div class="toPrintWrapper">
+      <button type="button" (click)="loadPrinters()">
+        <i class="material-icons">list</i>Cargar impresoras
+      </button>
+      <ng-container *ngIf="printers.length > 0">
+        <select [(ngModel)]="selectedPrinter">
+          <option value="" selected>Elige una impresora</option>
+          <option [value]="printer" *ngFor="let printer of printers">
+            {{ printer }}
+          </option>
+        </select>
+        <button
+          *ngIf="selectedPrinter !== ''"
+          [disabled]="testPageStatus === requestPrintStatusEnum.Requested"
+          type="button"
+          (click)="PrintTestMessage()"
+        >
+          <i class="material-icons">receipt_long</i>Imprimir página de prueba
+        </button>
+
+        <container-element [ngSwitch]="testPageStatus">
+          <p
+            class="info info_info"
+            *ngSwitchCase="requestPrintStatusEnum.Requested"
+          >
+            Esperando respuesta
+          </p>
+          <p
+            class="info info_success"
+            *ngSwitchCase="requestPrintStatusEnum.Successful"
+          >
+            Prueba correcta
+          </p>
+          <p
+            class="info info_danger"
+            *ngSwitchCase="requestPrintStatusEnum.Fail"
+          >
+            Prueba fallida
+          </p>
+        </container-element>
+      </ng-container>
+    </div>
+  </details>
+  <details>
+    <summary>Imprimir texto</summary>
+    <div class="toPrintWrapper">
+      <textarea
+        [(ngModel)]="textArea"
+        matInput
+        rows="5"
+        placeholder="Escribe aquí el texto a imprimir"
+      ></textarea>
+      <button
+        mat-flat-button
+        type="button"
+        color="primary"
+        (click)="ToPrintText()"
+      >
+        <!-- <mat-icon>print</mat-icon> -->Imprimir texto
+      </button>
+    </div>
+  </details>
+  <details open>
+    <summary>Imprime un ticket de venta</summary>
+    <div class="toPrintWrapper">
+      <form [formGroup]="ticketForm">
+        <input
+          type="text"
+          formControlName="businessName"
+          maxlength="21"
+          autocomplete="off"
+          required
+          placeholder="Nombre de tu negocio"
+        />
+        <!-- <mat-icon matSuffix>storefront</mat-icon> -->
+
+        <div formArrayName="ticketItems">
+          <div
+            class="itemTicket"
+            *ngFor="let item of itemsFormTicket.controls; let i = index"
+            [formGroupName]="i"
+          >
+            <input
+              style="max-width: 3.5rem"
+              placeholder="Uds"
+              type="number"
+              formControlName="uds"
+              required
+            />
+
+            <input
+              type="text"
+              formControlName="description"
+              placeholder="Descripción"
+              maxlength="21"
+              autocomplete="off"
+              required
+            />
+
+            <input
+              style="max-width: 4.5rem"
+              type="number"
+              formControlName="eur_ud"
+              placeholder="€/ud"
+              required
+            />
+
+            <button class="itemTicketDelete" (click)="deleteTicketItem(i)">
+              <i class="material-icons">clear</i>
+            </button>
+          </div>
+        </div>
+      </form>
+      <button type="button" (click)="addTicketItem()">
+        <i class="material-icons" style="margin-right: 0.5rem">add</i> Añadir
+        línea al ticket
+      </button>
+      <button
+        mat-flat-button
+        type="submit"
+        color="primary"
+        (click)="ToPrintTicket()"
+        [disabled]="ticketForm.invalid"
+      >
+        <i class="material-icons" style="margin-right: 0.5rem">receipt_long</i
+        >Imprimir ticket
+      </button>
+    </div>
+  </details>
+  <p style="text-align: center">
+    <a href="https://fjmduran.com" target="_blank" rel="noopener noreferrer"
+      >@fjmduran</a
+    >
+  </p>
+</div>
