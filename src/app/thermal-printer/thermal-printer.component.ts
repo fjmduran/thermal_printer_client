@@ -6,7 +6,7 @@ import { ThermalTicketItemInterface } from '../models/MessageThermalPrinter.inte
 @Component({
   selector: 'app-thermal-printer',
   templateUrl: './thermal-printer.component.html',
-  styleUrls: ['./thermal-printer.component.css']
+  styleUrls: ['./thermal-printer.component.css'],
 })
 export class ThermalPrinterComponent {
   public selectedPrinter = '';
@@ -19,6 +19,7 @@ export class ThermalPrinterComponent {
 
   public textArea =
     'Esto es una línea larga para probar cómo la impresora no corta palabras';
+  public maxCharacterNumber = 30;
 
   public ticketForm: FormGroup = new FormGroup({
     businessName: new FormControl(null, [
@@ -59,19 +60,33 @@ export class ThermalPrinterComponent {
   }
 
   async PrintTestMessage() {
-    const printer = new ThermalPrinter();
+    const printer = new ThermalPrinter(
+      undefined,
+      undefined,
+      this.maxCharacterNumber,
+      true
+    );
     this.testPageStatus = RequestPrintStatus.Requested;
     const testStatus = await printer.PrintTestPage();
     if (testStatus) {
-      printer.PrinterToLocalStorage(this.selectedPrinter);
       this.testPageStatus = RequestPrintStatus.Successful;
     } else {
       this.testPageStatus = RequestPrintStatus.Fail;
     }
   }
 
-  async ToPrintText() {
+  ToAsignDefaultPrinter() {
     const printer = new ThermalPrinter();
+    printer.PrinterToLocalStorage(this.selectedPrinter);
+  }
+
+  async ToPrintText() {
+    const printer = new ThermalPrinter(
+      undefined,
+      undefined,
+      this.maxCharacterNumber,
+      true
+    );
     printer.AddMessage({
       message: this.textArea,
     });
@@ -91,11 +106,18 @@ export class ThermalPrinterComponent {
     this.itemsFormTicket.controls.forEach((item) => {
       items.push(item.value as ThermalTicketItemInterface);
     });
-    const businessName=this.ticketForm.get('businessName')?.value;
+    const businessName = this.ticketForm.get('businessName')?.value;
     console.log(businessName);
-    
-    const printer = new ThermalPrinter();
-    const printStatus = await printer.ToPrintTicket(items,{name:businessName});
+
+    const printer = new ThermalPrinter(
+      undefined,
+      undefined,
+      this.maxCharacterNumber,
+      true
+    );
+    const printStatus = await printer.ToPrintTicket(items, {
+      name: businessName,
+    });
     if (printStatus) {
       console.log('OK');
       //this.testPageStatus = RequestPrintStatus.Successful;

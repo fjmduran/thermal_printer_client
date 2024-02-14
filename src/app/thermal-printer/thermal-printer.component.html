@@ -8,20 +8,34 @@
         <i class="material-icons">list</i>Cargar impresoras
       </button>
       <ng-container *ngIf="printers.length > 0">
-        <select [(ngModel)]="selectedPrinter">
+        <select
+          [(ngModel)]="selectedPrinter"
+          (change)="ToAsignDefaultPrinter()"
+        >
           <option value="" selected>Elige una impresora</option>
           <option [value]="printer" *ngFor="let printer of printers">
             {{ printer }}
           </option>
         </select>
-        <button
-          *ngIf="selectedPrinter !== ''"
-          [disabled]="testPageStatus === requestPrintStatusEnum.Requested"
-          type="button"
-          (click)="PrintTestMessage()"
-        >
-          <i class="material-icons">receipt_long</i>Imprimir página de prueba
-        </button>
+        <ng-container *ngIf="selectedPrinter !== ''">
+          <div class="configurationPrinter">
+            <label>Elige el número máximo de caracteres por línea</label>
+            <input
+              type="number"
+              [(ngModel)]="maxCharacterNumber"
+              autocomplete="off"
+              placeholder="30"
+            />
+          </div>
+          <button
+            
+            [disabled]="testPageStatus === requestPrintStatusEnum.Requested"
+            type="button"
+            (click)="PrintTestMessage()"
+          >
+            <i class="material-icons">receipt_long</i>Imprimir página de prueba
+          </button>
+        </ng-container>       
 
         <container-element [ngSwitch]="testPageStatus">
           <p

@@ -1,0 +1,9 @@
+ {
+    "deno.enable": false,
+   "deno.unstable": false,
+   "deno.lint": false,
+   "deno.path": "C:\\Users\\fjmartinez\\.deno\\bin\\deno.exe",
+   "deno.enablePaths": [
+    "./"
+   ]
+ }

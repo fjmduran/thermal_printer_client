@@ -3,10 +3,11 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build --configuration=production",
+    "debug": "ng serve",
+    "build": "ng build --configuration=production --output-hashing=all",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "deploy": "npm run build & firebase deploy --only hosting"
   },
   "private": true,
   "dependencies": {

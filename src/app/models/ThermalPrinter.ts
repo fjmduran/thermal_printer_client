@@ -2,24 +2,37 @@ import {
   BusinessDataForThermalTicket,
   JustificationEnum,
   MessageThermalPrinterInterface,
+  RestaurantOrderToPrinter,
   ThermalTicketInterface,
   ThermalTicketItemInterface,
 } from './MessageThermalPrinter.interface';
-import { Injectable } from '@angular/core';
 
-@Injectable({
-  providedIn: 'root',
-})
 export class ThermalPrinter {
-  private readonly MAX_CHARACTERS_BY_LINE = 30;
-  private readonly DEFAULT_PRINTER_NAME = 'POS-58-Series';
-  private readonly URL_PLUGIN = 'http://localhost:7878';
+  private MAX_CHARACTERS_BY_LINE: number;
+  private DEFAULT_PRINTER_NAME: string;
+  private URL_PLUGIN: string;
+  private REMOVE_ACCENTS: boolean;
+
+  constructor(
+    pluginUrl?: string,
+    printerName?: string,
+    maxCharactersByLine?: number,
+    removeAccents?: boolean
+  ) {
+    this.URL_PLUGIN = pluginUrl || 'http://localhost:7878';
+    this.DEFAULT_PRINTER_NAME = printerName || 'POS-58-Series';
+    this.MAX_CHARACTERS_BY_LINE = maxCharactersByLine || 0; //30 para la POS-58-Series, 40 para la BIXOLOM
+    this.REMOVE_ACCENTS = removeAccents || false;
+  }
 
   private messages: MessageThermalPrinterInterface[] = [];
 
   public AddMessage(message: MessageThermalPrinterInterface) {
     const printerName = this.PrinterName;
-    message.message = this.WordWrap(message.message);
+    if (this.REMOVE_ACCENTS)
+      message.message = this.RemoveAccents(message.message);
+    if (this.MAX_CHARACTERS_BY_LINE > 0)
+      message.message = this.WordWrap(message.message);
     message.printerName = printerName;
     this.messages.push(message);
   }
@@ -28,6 +41,7 @@ export class ThermalPrinter {
     const printerName = localStorage.getItem('printerName');
     if (printerName) return printerName;
     console.error('No se encuentra la impresora, se asigna una por defecto');
+    this.PrinterToLocalStorage(this.DEFAULT_PRINTER_NAME);
     return this.DEFAULT_PRINTER_NAME;
   }
 
@@ -52,7 +66,27 @@ export class ThermalPrinter {
     return await this.RequestToPrinter();
   }
 
-  public async ToPrintTicket(ticketItems: ThermalTicketItemInterface[], business:BusinessDataForThermalTicket) {
+  public async ToPrintRestaurantOrder(
+    restaurantOrder: RestaurantOrderToPrinter
+  ): Promise<boolean> {
+    this.AddMessage({ message: `CLIENTE: ${restaurantOrder.client}` });
+    this.AddBlankLine();
+
+    restaurantOrder.products.forEach((item) => {
+      this.AddMessage({ message: `${new Date(item.id).toLocaleString()}` });
+      this.AddMessage({ message: `${item.uds} ${item.description}` });
+      if (item.observations)
+        this.AddMessage({ message: `${item.observations}` });
+      this.AddBlankLine();
+    });
+
+    return await this.RequestToPrinter();
+  }
+
+  public async ToPrintTicket(
+    ticketItems: ThermalTicketItemInterface[],
+    business: BusinessDataForThermalTicket
+  ) {
     const ticket = this.ToCreateTicket(ticketItems);
 
     this.AddMessage({ message: `${business.name}` });
@@ -61,7 +95,10 @@ export class ThermalPrinter {
     this.AddMessage({ message: `HORA: ${ticket.time}` });
     this.AddBlankLine();
 
-    this.AddMessage({ message: `UDS CONCEPTO            EU/UD` });
+    const spacesBetweenConceptPrice = this.MAX_CHARACTERS_BY_LINE - 20;
+    this.AddMessage({
+      message: `UDS CONCEPTO ${' '.repeat(spacesBetweenConceptPrice)} EU/UD`,
+    });
     ticketItems.forEach((item) => {
       this.AddMessage(this.GetItemTickeForPrinter(item));
     });
@@ -84,7 +121,7 @@ export class ThermalPrinter {
     const udsWithDesiredLength = this.addSpaces(item.uds.toString(), 3);
     const descriptionWithDesiredLength = this.addSpaces(
       item.description.toString(),
-      19,
+      this.MAX_CHARACTERS_BY_LINE-11,
       false
     );
     const eur_udWithDesiredLenght = this.addSpaces(item.eur_ud.toFixed(2), 5);
@@ -134,7 +171,9 @@ export class ThermalPrinter {
     }
   }
 
-  private ToCreateTicket(ticketItems: ThermalTicketItemInterface[]): ThermalTicketInterface {
+  private ToCreateTicket(
+    ticketItems: ThermalTicketItemInterface[]
+  ): ThermalTicketInterface {
     const currentDate = new Date();
     let total = 0;
     ticketItems.forEach((item) => {
@@ -154,15 +193,18 @@ export class ThermalPrinter {
     };
   }
 
+  private RemoveAccents(message: string): string {
+    return message.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
   private WordWrap(message: string): string {
     // Función para dividir el texto en líneas que no corten palabras
-
     const words = message.split(' ');
     let currentLine = '';
     let lines = '';
 
     words.forEach((word) => {
-      if (currentLine.length + word.length + 1 > this.MAX_CHARACTERS_BY_LINE) {
+      if (currentLine.length + word.length > this.MAX_CHARACTERS_BY_LINE) {
         lines += `${currentLine}\n`;
         currentLine = word + ' ';
       } else {
@@ -173,24 +215,24 @@ export class ThermalPrinter {
     return lines;
   }
 
-  public PrinterToLocalStorage(printerName:string){
-    localStorage.setItem('printerName',printerName);
+  public PrinterToLocalStorage(printerName: string) {
+    localStorage.setItem('printerName', printerName);
   }
 
-  public async GetPrinters(): Promise<string[]> {    
+  public async GetPrinters(): Promise<string[]> {
     try {
       const response = await fetch(this.URL_PLUGIN, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-        }        
+        },
       });
 
       if (!response.ok) {
         throw new Error('Error en la solicitud');
       }
 
-      const result:string[] = await response.json();      
+      const result: string[] = await response.json();
       return result;
     } catch (error: any) {
       console.error('Error:', error.message);

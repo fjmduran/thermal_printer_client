@@ -26,6 +26,19 @@ export interface BusinessDataForThermalTicket{
     name:string
 }
 
+export interface RestaurantOrderToPrinter {
+    client: string;
+    products: ProductOrderToPrinter[];    
+    printersName: string[]; //por si quiero enviar una comanda a más de una impresora
+  }
+  
+  export interface ProductOrderToPrinter {
+    id: number;
+    uds: number;
+    description: string;
+    observations: string;
+  }
+
 export enum JustificationEnum
 {
     Left=0,
