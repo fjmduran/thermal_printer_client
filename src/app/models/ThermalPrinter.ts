@@ -9,20 +9,23 @@ import {
 
 export class ThermalPrinter {
   private MAX_CHARACTERS_BY_LINE: number;
-  private DEFAULT_PRINTER_NAME: string;
+  private PRINTER_NAME: string;
   private URL_PLUGIN: string;
   private REMOVE_ACCENTS: boolean;
+  private NUMBER_LINES_ADD_TO_END: number;
 
   constructor(
     pluginUrl?: string,
     printerName?: string,
     maxCharactersByLine?: number,
-    removeAccents?: boolean
+    removeAccents?: boolean,
+    numberLineAddToEnd?: number
   ) {
     this.URL_PLUGIN = pluginUrl || 'http://localhost:7878';
-    this.DEFAULT_PRINTER_NAME = printerName || 'POS-58-Series';
+    this.PRINTER_NAME = printerName || 'POS-58-Series';
     this.MAX_CHARACTERS_BY_LINE = maxCharactersByLine || 0; //30 para la POS-58-Series, 40 para la BIXOLOM
     this.REMOVE_ACCENTS = removeAccents || false;
+    this.NUMBER_LINES_ADD_TO_END = numberLineAddToEnd || 0;
   }
 
   private messages: MessageThermalPrinterInterface[] = [];
@@ -38,11 +41,7 @@ export class ThermalPrinter {
   }
 
   private get PrinterName(): string {
-    const printerName = localStorage.getItem('printerName');
-    if (printerName) return printerName;
-    console.error('No se encuentra la impresora, se asigna una por defecto');
-    this.PrinterToLocalStorage(this.DEFAULT_PRINTER_NAME);
-    return this.DEFAULT_PRINTER_NAME;
+    return this.PRINTER_NAME;
   }
 
   public AddBlankLine() {
@@ -68,12 +67,12 @@ export class ThermalPrinter {
 
   public async ToPrintRestaurantOrder(
     restaurantOrder: RestaurantOrderToPrinter
-  ): Promise<boolean> {
+  ): Promise<any> {
     this.AddMessage({ message: `CLIENTE: ${restaurantOrder.client}` });
     this.AddBlankLine();
 
     restaurantOrder.products.forEach((item) => {
-      this.AddMessage({ message: `${new Date(item.id).toLocaleString()}` });
+      this.AddMessage({ message: `${new Date(item.id).toLocaleTimeString()}` });
       this.AddMessage({ message: `${item.uds} ${item.description}` });
       if (item.observations)
         this.AddMessage({ message: `${item.observations}` });
@@ -112,6 +111,10 @@ export class ThermalPrinter {
       message: `GRACIAS POR SU VISITA`,
       justification: JustificationEnum.Center,
     });
+
+    const toOpenDrawer = "\u001Bp\0";
+    this.AddMessage({ message: toOpenDrawer });
+
     return await this.RequestToPrinter();
   }
 
@@ -121,7 +124,7 @@ export class ThermalPrinter {
     const udsWithDesiredLength = this.addSpaces(item.uds.toString(), 3);
     const descriptionWithDesiredLength = this.addSpaces(
       item.description.toString(),
-      this.MAX_CHARACTERS_BY_LINE-11,
+      this.MAX_CHARACTERS_BY_LINE - 11,
       false
     );
     const eur_udWithDesiredLenght = this.addSpaces(item.eur_ud.toFixed(2), 5);
@@ -147,7 +150,11 @@ export class ThermalPrinter {
     return input + spaces;
   }
 
-  private async RequestToPrinter() {
+  private async RequestToPrinter(): Promise<any> {
+    for (let i = 0; i <= this.NUMBER_LINES_ADD_TO_END; i++) {
+      this.AddBlankLine();
+    }
+
     const data = this.messages;
     try {
       const response = await fetch(this.URL_PLUGIN, {
@@ -159,15 +166,17 @@ export class ThermalPrinter {
       });
 
       if (!response.ok) {
-        throw new Error('Error en la solicitud');
+        const message = `Error en la solicitud ${await response.json()}`;
+        console.error(message);
+        return new Error(message);
       }
 
       const result = await response.json();
       console.log('Respuesta del servidor:', result);
-      return true;
+      return;
     } catch (error: any) {
       console.error('Error:', error.message);
-      return false;
+      return;
     }
   }
 
@@ -194,7 +203,19 @@ export class ThermalPrinter {
   }
 
   private RemoveAccents(message: string): string {
-    return message.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    return message
+      .replace(/[áäâà]/g, 'a')
+      .replace(/[éëêè]/g, 'e')
+      .replace(/[íïîì]/g, 'i')
+      .replace(/[óöôò]/g, 'o')
+      .replace(/[úüûù]/g, 'u')
+      .replace(/[ñ]/g, 'n')
+      .replace(/[ÁÄÂÀ]/g, 'A')
+      .replace(/[ÉËÊÈ]/g, 'E')
+      .replace(/[ÍÏÎÌ]/g, 'I')
+      .replace(/[ÓÖÔÒ]/g, 'O')
+      .replace(/[ÚÜÛÙ]/g, 'U')
+      .replace(/[N]/g, 'N');
   }
 
   private WordWrap(message: string): string {
