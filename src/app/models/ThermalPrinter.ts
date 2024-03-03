@@ -5,6 +5,7 @@ import {
   RestaurantOrderToPrinter,
   ThermalTicketInterface,
   ThermalTicketItemInterface,
+  WidthFontEnum,
 } from './MessageThermalPrinter.interface';
 
 export class ThermalPrinter {
@@ -47,6 +48,23 @@ export class ThermalPrinter {
   public AddBlankLine() {
     this.messages.push({
       message: `\n`,
+      printerName:this.PrinterName
+    });
+  }
+
+  public AddSingleLine() {
+    const underscores = '-'.repeat(this.MAX_CHARACTERS_BY_LINE);
+    this.messages.push({
+      message: `${underscores}\n`,
+      printerName:this.PrinterName
+    });
+  }
+
+  public AddDoubleLine() {
+    const underscores = '='.repeat(this.MAX_CHARACTERS_BY_LINE);
+    this.messages.push({
+      message: `${underscores}\n`,
+      printerName:this.PrinterName
     });
   }
 
@@ -68,16 +86,27 @@ export class ThermalPrinter {
   public async ToPrintRestaurantOrder(
     restaurantOrder: RestaurantOrderToPrinter
   ): Promise<any> {
+    //ten cuidado que si añades una línea antes tienes que especificar la impresora y demás, por ejemplo
+    //si añado una línea doble
     this.AddMessage({ message: `CLIENTE: ${restaurantOrder.client}` });
-    this.AddBlankLine();
+    this.AddMessage({
+      message: `${new Date(
+        restaurantOrder.products[restaurantOrder.products.length - 1].id
+      ).toLocaleTimeString()}`,
+    });
 
     restaurantOrder.products.forEach((item) => {
-      this.AddMessage({ message: `${new Date(item.id).toLocaleTimeString()}` });
+      this.AddBlankLine();
+      this.AddSingleLine();
+      this.AddBlankLine();
+
       this.AddMessage({ message: `${item.uds} ${item.description}` });
       if (item.observations)
         this.AddMessage({ message: `${item.observations}` });
-      this.AddBlankLine();
     });
+
+    this.AddBlankLine();
+    this.AddDoubleLine();
 
     return await this.RequestToPrinter();
   }
@@ -103,7 +132,7 @@ export class ThermalPrinter {
     });
 
     this.AddBlankLine();
-    this.AddMessage({ message: `TOTAL A PAGAR: ${ticket.total.toFixed(2)}` });
+    this.AddMessage({ message: `TOTAL A PAGAR: ${ticket.total.toFixed(2)}`,widthFont:WidthFontEnum.Bold });
     this.AddMessage({ message: `BASE: ${ticket.base.toFixed(2)}` });
     this.AddMessage({ message: `IVA: ${ticket.iva.toFixed(2)}` });
     this.AddBlankLine();
@@ -112,7 +141,7 @@ export class ThermalPrinter {
       justification: JustificationEnum.Center,
     });
 
-    const toOpenDrawer = "\u001Bp\0";
+    const toOpenDrawer = '\u001Bp\0';
     this.AddMessage({ message: toOpenDrawer });
 
     return await this.RequestToPrinter();

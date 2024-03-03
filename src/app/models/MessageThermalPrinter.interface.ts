@@ -53,4 +53,5 @@ export enum HeightFontEnum {
 
 export enum WidthFontEnum {
   Normal = 0,
+  Bold=1
 }
