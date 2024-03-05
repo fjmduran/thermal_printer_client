@@ -1,5 +1,6 @@
 import {
   BusinessDataForThermalTicket,
+  HeightFontEnum,
   JustificationEnum,
   MessageThermalPrinterInterface,
   RestaurantOrderToPrinter,
@@ -48,7 +49,7 @@ export class ThermalPrinter {
   public AddBlankLine() {
     this.messages.push({
       message: `\n`,
-      printerName:this.PrinterName
+      printerName: this.PrinterName,
     });
   }
 
@@ -56,7 +57,7 @@ export class ThermalPrinter {
     const underscores = '-'.repeat(this.MAX_CHARACTERS_BY_LINE);
     this.messages.push({
       message: `${underscores}\n`,
-      printerName:this.PrinterName
+      printerName: this.PrinterName,
     });
   }
 
@@ -64,7 +65,7 @@ export class ThermalPrinter {
     const underscores = '='.repeat(this.MAX_CHARACTERS_BY_LINE);
     this.messages.push({
       message: `${underscores}\n`,
-      printerName:this.PrinterName
+      printerName: this.PrinterName,
     });
   }
 
@@ -125,19 +126,29 @@ export class ThermalPrinter {
 
     const spacesBetweenConceptPrice = this.MAX_CHARACTERS_BY_LINE - 20;
     this.AddMessage({
-      message: `UDS CONCEPTO ${' '.repeat(spacesBetweenConceptPrice)} EU/UD`,
+      message: `UDS CONCEPTO ${' '.repeat(spacesBetweenConceptPrice)} TOTAL`,
     });
     ticketItems.forEach((item) => {
       this.AddMessage(this.GetItemTickeForPrinter(item));
     });
 
     this.AddBlankLine();
-    this.AddMessage({ message: `TOTAL A PAGAR: ${ticket.total.toFixed(2)}`,widthFont:WidthFontEnum.Bold });
-    this.AddMessage({ message: `BASE: ${ticket.base.toFixed(2)}` });
-    this.AddMessage({ message: `IVA: ${ticket.iva.toFixed(2)}` });
+    this.AddMessage({
+      message: `TOTAL A PAGAR: ${ticket.total.toFixed(2)}`,
+      widthFont: WidthFontEnum.Bold,
+      heightFont: HeightFontEnum.Double,
+    });
+    this.AddMessage({
+      message: `10% sobre ${ticket.base.toFixed(2)} = ${ticket.iva.toFixed(2)}`,
+    });
     this.AddBlankLine();
     this.AddMessage({
       message: `GRACIAS POR SU VISITA`,
+      justification: JustificationEnum.Center,
+    });
+    this.AddBlankLine();
+    this.AddMessage({
+      message: `I.V.A. incluido`,
       justification: JustificationEnum.Center,
     });
 
@@ -156,9 +167,10 @@ export class ThermalPrinter {
       this.MAX_CHARACTERS_BY_LINE - 11,
       false
     );
-    const eur_udWithDesiredLenght = this.addSpaces(item.eur_ud.toFixed(2), 5);
+    const totalItem = item.uds * item.eur_ud;
+    const totalEurWithDesiredLenght = this.addSpaces(totalItem.toFixed(2), 5);
     return {
-      message: `${udsWithDesiredLength} ${descriptionWithDesiredLength} ${eur_udWithDesiredLenght}`,
+      message: `${udsWithDesiredLength} ${descriptionWithDesiredLength} ${totalEurWithDesiredLenght}`,
     };
   }
 
@@ -180,6 +192,8 @@ export class ThermalPrinter {
   }
 
   private async RequestToPrinter(): Promise<any> {
+    console.log(this.NUMBER_LINES_ADD_TO_END);
+    
     for (let i = 0; i <= this.NUMBER_LINES_ADD_TO_END; i++) {
       this.AddBlankLine();
     }

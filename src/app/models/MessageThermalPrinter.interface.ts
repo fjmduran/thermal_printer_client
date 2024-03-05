@@ -32,6 +32,7 @@ export interface RestaurantOrderToPrinter {
   printer: {
     name: string;
     maxCharacters: number;
+    numberLinesAddToEnd:number;
   };
 }
 
@@ -49,6 +50,7 @@ export enum JustificationEnum {
 
 export enum HeightFontEnum {
   Normal = 0,
+  Double
 }
 
 export enum WidthFontEnum {
